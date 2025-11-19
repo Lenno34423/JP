@@ -1,0 +1,117 @@
+using UnityEngine;
+
+public class PlayerMovement : MonoBehaviour
+{
+    [Header("Movement Settings")]
+    public float moveSpeed = 5f;
+    public float maxJumpForce = 10f;
+    public float jumpChargeSpeed = 10f;
+
+    [Header("Ground Check Settings")]
+    public Transform groundCheck;
+    public float checkRadius = 0.2f;
+    public LayerMask groundLayer;
+
+    [Header("Animation")]
+    public Animator animator;
+
+    private Rigidbody2D rb;
+    private bool isGrounded;
+    private bool isChargingJump;
+    private float jumpChargePower;
+    private bool wasGrounded = false;
+
+    void Start()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        if (animator == null)
+            animator = GetComponent<Animator>();
+    }
+
+    void Update()
+    {
+        CheckGround();
+        HandleMovement();
+        HandleJump();
+        HandleAttack();
+        UpdateAnimations();
+    }
+
+    void CheckGround()
+    {
+        isGrounded = Physics2D.OverlapCircle(groundCheck.position, checkRadius, groundLayer);
+    }
+
+    void HandleMovement()
+    {
+        float horizontal = 0f;
+        bool isMoving = false;
+
+        if (Input.GetKey(KeyCode.A))
+        {
+            horizontal = -moveSpeed;
+            transform.localScale = new Vector3(1, 1, 1);
+            isMoving = true;
+        }
+        else if (Input.GetKey(KeyCode.D))
+        {
+            horizontal = moveSpeed;
+            transform.localScale = new Vector3(-1, 1, 1);
+            isMoving = true;
+        }
+
+        rb.velocity = new Vector2(horizontal, rb.velocity.y);
+
+        animator.SetBool("IsMoving", isMoving);
+    }
+
+    void HandleJump()
+    {
+        if (isGrounded)
+        {
+            if (Input.GetKey(KeyCode.Space))
+            {
+                isChargingJump = true;
+                jumpChargePower += jumpChargeSpeed * Time.deltaTime;
+                jumpChargePower = Mathf.Clamp(jumpChargePower, 5, maxJumpForce);
+            }
+
+            if (Input.GetKeyUp(KeyCode.Space) && isChargingJump)
+            {
+                rb.AddForce(Vector2.up * jumpChargePower, ForceMode2D.Impulse);
+                isChargingJump = false;
+                jumpChargePower = 0;
+                animator.SetTrigger("TrJump");
+            }
+        }
+        else
+        {
+            isChargingJump = false;
+            jumpChargePower = 0;
+        }
+    }
+
+    void HandleAttack()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            animator.SetTrigger("TrAttack");
+        }
+    }
+
+    void UpdateAnimations()
+    {
+        animator.SetBool("IsGrounded", isGrounded);
+        
+        if (isGrounded && !wasGrounded)
+        {
+
+            if (!animator.GetBool("IsMoving"))
+            {
+                animator.Play("Idle");
+            }
+        }
+
+        wasGrounded = isGrounded;
+    }
+}
