@@ -1,0 +1,33 @@
+using UnityEngine;
+
+public class GrondScript : MonoBehaviour
+{
+    [Header("Ground Settings")]
+    public GameObject groundTilePrefab;  // Sleep je prefab hiernaartoe!
+    public int numberOfTiles = 10;
+
+    void Start()
+    {
+        if (groundTilePrefab == null)
+        {
+            Debug.LogError("Sleep de Ground Tile Prefab naar het script!");
+            return;
+        }
+
+        CreateGround();
+    }
+
+    void CreateGround()
+    {
+        // Haal de breedte van de sprite op
+        SpriteRenderer spriteRenderer = groundTilePrefab.GetComponent<SpriteRenderer>();
+        float tileWidth = spriteRenderer.bounds.size.x;
+
+        // Spawn tiles
+        for (int i = 0; i < numberOfTiles; i++)
+        {
+            Vector3 spawnPos = transform.position + new Vector3(i * tileWidth, 0f, 0f);
+            Instantiate(groundTilePrefab, spawnPos, Quaternion.identity, transform);
+        }
+    }
+}
