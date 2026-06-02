@@ -1,0 +1,107 @@
+using UnityEngine;
+
+public class AchtergrondScript : MonoBehaviour
+{
+    // De positie van de speler (nodig voor parallax)
+    public Transform spelerTransform;
+
+    // Prefabs voor de drie achtergrondlagen
+    public GameObject achtergrond1Prefab;
+    public GameObject achtergrond2Prefab;
+    public GameObject achtergrond3Prefab;
+
+    // Hoeveel tiles je naast elkaar wil spawnen
+    public int numberOfBackgroundTiles;
+
+    // Parallax-snelheden voor elke laag
+    public float parallaxSpeed1 = 50f;   // snelste laag (meestal voorgrond)
+    public float parallaxSpeed2 = 0.1f;  // middelste laag
+    public float parallaxSpeed3 = 0.05f; // verste laag (beweegt het minst)
+
+    void Start()
+    {
+        // Maak alle drie de achtergrondlagen aan bij start
+        CreateAchtergrond1();
+        CreateAchtergrond2();
+        CreateAchtergrond3();
+    }
+
+    void CreateAchtergrond1()
+    {
+        // Als er geen prefab is ingesteld → stop
+        if (achtergrond1Prefab == null) return;
+        
+        // Breedte van de sprite ophalen
+        SpriteRenderer spriteRenderer = achtergrond1Prefab.GetComponent<SpriteRenderer>();
+        float tileWidth = spriteRenderer.bounds.size.x;
+
+        // Tiles naast elkaar spawnen
+        for (int i = -20; i < numberOfBackgroundTiles; i++)
+        {
+            // Bepaal spawnpositie (iets hoger op de Y-as)
+            Vector3 spawnPos = transform.position + new Vector3(i * tileWidth, 3.6f, 0f);
+
+            // Instantieer de tile als child van dit object
+            Instantiate(achtergrond1Prefab, spawnPos, Quaternion.identity, transform);
+        }
+    }
+    
+    void CreateAchtergrond2()
+    {
+        if (achtergrond2Prefab == null) return;
+        
+        SpriteRenderer spriteRenderer = achtergrond2Prefab.GetComponent<SpriteRenderer>();
+        float tileWidth = spriteRenderer.bounds.size.x;
+
+        for (int i = -20; i < numberOfBackgroundTiles; i++)
+        {
+            // Deze laag staat iets lager dan laag 1
+            Vector3 spawnPos = transform.position + new Vector3(i * tileWidth, 3f, 0f);
+            Instantiate(achtergrond2Prefab, spawnPos, Quaternion.identity, transform);
+        }
+    }
+    
+    void CreateAchtergrond3()
+    {
+        if (achtergrond3Prefab == null) return;
+        
+        SpriteRenderer spriteRenderer = achtergrond3Prefab.GetComponent<SpriteRenderer>();
+        float tileWidth = spriteRenderer.bounds.size.x;
+
+        for (int i = -20; i < numberOfBackgroundTiles; i++)
+        {
+            // Deze laag staat het laagst (verste achtergrond)
+            Vector3 spawnPos = transform.position + new Vector3(i * tileWidth, 0.35f, 0f);
+            Instantiate(achtergrond3Prefab, spawnPos, Quaternion.identity, transform);
+        }
+    }
+
+    void Update()
+    {
+        // Positie van de speler ophalen
+        Vector3 spelerPos = spelerTransform.position;
+
+        // Parallax-effect: elke laag beweegt anders mee met de speler
+        // transform.GetChild(0) = laag 1
+        // transform.GetChild(1) = laag 2
+        // transform.GetChild(2) = laag 3
+
+        transform.GetChild(0).position = new Vector3(
+            spelerPos.x * parallaxSpeed1, 
+            transform.GetChild(0).position.y, 
+            0f
+        );
+
+        transform.GetChild(1).position = new Vector3(
+            spelerPos.x * parallaxSpeed2, 
+            transform.GetChild(1).position.y, 
+            0f
+        );
+
+        transform.GetChild(2).position = new Vector3(
+            spelerPos.x * parallaxSpeed3, 
+            transform.GetChild(2).position.y, 
+            0f
+        );
+    }
+}
