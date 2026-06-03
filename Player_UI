@@ -1,0 +1,40 @@
+using UnityEngine;
+using UnityEngine.UI;
+using System.Collections.Generic;
+
+public class Player_UI : MonoBehaviour
+{
+    public playerHealth Health;          // Referentie naar het health‑script van de speler
+    public GameObject heartPrefab;       // Prefab van één hart‑icoon
+    public Transform heartContainer;     // UI‑object waar alle hartjes in komen
+
+    private List<GameObject> hearts = new List<GameObject>(); // Lijst met actieve hartjes
+
+    private void Start()
+    {
+        UpdateHearts();                  // Bij start meteen hartjes tonen
+    }
+
+    private void Update()
+    {
+        UpdateHearts();                  // Elke frame hartjes updaten (kan ook via event)
+    }
+
+    void UpdateHearts()
+    {
+        // Oude hartjes verwijderen
+        foreach (GameObject h in hearts)
+            Destroy(h);                  // Verwijder het UI‑object
+        hearts.Clear();                  // Maak de lijst leeg
+
+        // Nieuwe hartjes aanmaken op basis van HP
+        for (int i = 0; i < Health.currentHealth; i++)
+        {
+            // Maak een nieuw hartje aan als child van heartContainer
+            GameObject newHeart = Instantiate(heartPrefab, heartContainer);
+
+            // Bewaar het hartje in de lijst zodat we het later kunnen verwijderen
+            hearts.Add(newHeart);
+        }
+    }
+}
