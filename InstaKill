@@ -1,0 +1,22 @@
+using UnityEngine;
+
+public class InstaKill : MonoBehaviour
+{
+    public int damage = 100;   // Hoeveel schade dit object doet (100 = instant kill)
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        // Alleen reageren wanneer de speler de trigger raakt
+        if (other.CompareTag("Player"))
+        {
+            // Haal het playerHealth‑script op
+            playerHealth hp = other.GetComponent<playerHealth>();
+
+            // Als de speler health heeft → schade toebrengen
+            if (hp != null)
+            {
+                hp.TakeDamage(damage);   // 100 damage = meestal direct dood
+            }
+        }
+    }
+}
