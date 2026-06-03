@@ -1,0 +1,42 @@
+using UnityEngine;
+
+public class WeaponSelector : MonoBehaviour
+{
+    public Transform weaponHolder;
+
+    public GameObject weapon1Prefab; // dagger
+    public GameObject weapon2Prefab; // club
+    public GameObject weapon3Prefab; // spear
+
+    private GameObject currentWeapon;
+
+    // UI-knoppen roepen deze functies op
+    public void SelectWeapon1()
+    {
+        GameManager.selectedWeapon = "dagger";
+        EquipWeapon(weapon1Prefab);
+    }
+
+    public void SelectWeapon2()
+    {
+        GameManager.selectedWeapon = "club";
+        EquipWeapon(weapon2Prefab);
+    }
+
+    public void SelectWeapon3()
+    {
+        GameManager.selectedWeapon = "spear";
+        EquipWeapon(weapon3Prefab);
+    }
+
+    private void EquipWeapon(GameObject weaponPrefab)
+    {
+        if (currentWeapon != null)
+            Destroy(currentWeapon);
+
+        currentWeapon = Instantiate(weaponPrefab, weaponHolder);
+
+        currentWeapon.transform.localPosition = Vector3.zero;
+        currentWeapon.transform.localRotation = Quaternion.identity;
+    }
+}
