@@ -1,0 +1,12 @@
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class StartMenuLoader : MonoBehaviour
+{
+    // Functie die wordt aangeroepen wanneer je op een UI‑knop drukt
+    public void LoadStartMenu()
+    {
+        // Laad de scene met de naam "StartMenu"
+        SceneManager.LoadScene("StartMenu");
+    }
+}
