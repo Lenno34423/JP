@@ -1,0 +1,24 @@
+using UnityEngine;
+
+public class PlayerLightAttack : MonoBehaviour
+{
+    public Animator anim;              // Animator die de light‑attack animatie afspeelt
+    public bool isAttacking = false;   // Of de speler momenteel een light attack uitvoert
+
+    void Update()
+    {
+        // Light attack starten wanneer K wordt ingedrukt
+        // Alleen als er geen aanval bezig is
+        if (Input.GetKeyDown(KeyCode.K) && !isAttacking)
+        {
+            isAttacking = true;            // Blokkeer nieuwe aanvallen
+            anim.SetTrigger("TrAttack");   // Speel light attack animatie af
+        }
+    }
+
+    // Animation Event op het einde van de light attack animatie
+    public void EndLightAttack()
+    {
+        isAttacking = false;               // Speler mag opnieuw aanvallen
+    }
+}
