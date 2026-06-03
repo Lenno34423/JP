@@ -1,0 +1,54 @@
+using UnityEngine;
+
+public class WeaponSwitcher : MonoBehaviour
+{
+    [Header("Wapen Instellingen")]
+    public Transform weaponHolder;       // Transform waar het wapen in de hand wordt geplaatst
+    public GameObject[] weapons;         // Alle wapen-prefabs die je kunt equippen
+    public float[] attackSpeeds;         // Animatiesnelheid per wapen (zelfde index als weapons[])
+
+    [Header("Speler Animator")]
+    public Animator playerAnimator;      // Animator van de speler (voor attack speed)
+
+    [HideInInspector]
+    public GameObject currentWeapon;     // Het wapen dat momenteel actief is
+
+    public void EquipWeapon(int index)
+    {
+        // Verwijder ALLE wapens die nog in de hand zitten
+        foreach (Transform child in weaponHolder)
+        {
+            Destroy(child.gameObject);
+        }
+
+        // Instantieer het nieuwe wapen in de hand
+        currentWeapon = Instantiate(weapons[index], weaponHolder);
+        currentWeapon.transform.localPosition = Vector3.zero;      // Perfect in de hand
+        currentWeapon.transform.localRotation = Quaternion.identity;
+
+        // Pas de animatiesnelheid aan op basis van het wapen
+        if (playerAnimator != null && attackSpeeds.Length > index)
+        {
+            playerAnimator.SetFloat("AttackSpeed", attackSpeeds[index]);
+        }
+    }
+
+    void Start()
+    {
+        // Start standaard met wapen 0
+        EquipWeapon(0);
+    }
+
+    void Update()
+    {
+        // Wissel wapens via toetsen 1, 2 en 3
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+            EquipWeapon(0);
+
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+            EquipWeapon(1);
+
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+            EquipWeapon(2);
+    }
+}
