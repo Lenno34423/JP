@@ -1,0 +1,36 @@
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class GoToEndScreen : MonoBehaviour
+{
+    private bool playerInRange = false;      // True wanneer speler in de trigger staat
+
+    void Update()
+    {
+        // Als speler in de trigger staat én op E drukt → ga naar EndScreen
+        if (playerInRange && Input.GetKeyDown(KeyCode.E))
+        {
+            Time.timeScale = 1f;             // Voor de zekerheid: unfreeze de game
+            SceneManager.LoadScene("EndScreen"); // Laad de EndScreen scene
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        // Speler komt in de trigger → klaar om te ontsnappen
+        if (other.CompareTag("Player"))
+        {
+            playerInRange = true;
+            Debug.Log("Press E to escape");  // Debug‑melding
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        // Speler verlaat de trigger → kan niet meer ontsnappen
+        if (other.CompareTag("Player"))
+        {
+            playerInRange = false;
+        }
+    }
+}
