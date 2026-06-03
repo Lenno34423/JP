@@ -1,0 +1,26 @@
+using UnityEngine;
+
+public class DeathScreenController : MonoBehaviour
+{
+    public CanvasGroup canvasGroup;        // CanvasGroup om de alpha (fade) te controleren
+    public float fadeSpeed = 1f;           // Hoe snel de fade‑in gebeurt
+
+    public void Show()
+    {
+        // Start de fade‑in animatie wanneer de speler sterft
+        StartCoroutine(FadeIn());
+    }
+
+    private System.Collections.IEnumerator FadeIn()
+    {
+        // Laat de alpha langzaam stijgen tot 1 (volledig zichtbaar)
+        while (canvasGroup.alpha < 1)
+        {
+            canvasGroup.alpha += Time.deltaTime * fadeSpeed;
+            yield return null;             // Wacht 1 frame
+        }
+
+        // Pauzeer de game volledig zodra de death screen volledig zichtbaar is
+        Time.timeScale = 0f;
+    }
+}
