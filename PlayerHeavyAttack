@@ -2,20 +2,23 @@ using UnityEngine;
 
 public class PlayerHeavyAttack : MonoBehaviour
 {
-    public Animator anim;
-    public bool isAttacking = false;
+    public Animator anim;              // Animator die de aanval‑animatie afspeelt
+    public bool isAttacking = false;   // Of de speler momenteel een heavy attack uitvoert
 
     void Update()
     {
+        // Heavy attack starten wanneer K wordt ingedrukt
+        // Alleen als er geen aanval bezig is
         if (Input.GetKeyDown(KeyCode.K) && !isAttacking)
         {
-            isAttacking = true;
-            anim.SetTrigger("TrAttack");
+            isAttacking = true;        // Blokkeer nieuwe aanvallen
+            anim.SetTrigger("TrAttack"); // Speel heavy attack animatie af
         }
     }
 
+    // Animation Event op het einde van de heavy attack animatie
     public void EndHeavyAttack()
     {
-        isAttacking = false;
+        isAttacking = false;           // Speler mag opnieuw aanvallen
     }
 }
