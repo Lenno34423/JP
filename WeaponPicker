@@ -1,0 +1,23 @@
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class WeaponPicker : MonoBehaviour
+{
+    // Wordt aangeroepen wanneer speler op de dagger‑knop klikt
+    public void PickDagger()
+    {
+        GameManager.selectedWeapon = "dagger"; // Sla keuze op
+    }
+
+    // Wordt aangeroepen wanneer speler op de club‑knop klikt
+    public void PickClub()
+    {
+        GameManager.selectedWeapon = "club";   // Sla keuze op
+    }
+
+    // Wordt aangeroepen wanneer speler op de spear‑knop klikt
+    public void PickSpear()
+    {
+        GameManager.selectedWeapon = "spear";  // Sla keuze op
+    }
+}
