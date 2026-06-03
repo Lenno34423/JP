@@ -1,0 +1,30 @@
+using UnityEngine;
+
+public class PlantHealth : MonoBehaviour
+{
+    public int maxHealth = 5;      // Maximale HP van de plant enemy
+    private int currentHealth;     // Huidige HP tijdens het spel
+
+    void Start()
+    {
+        currentHealth = maxHealth; // Begin altijd met volle HP
+    }
+
+    public void TakeDamage(int amount)
+    {
+        currentHealth -= amount;   // Verminder HP met de hoeveelheid damage
+
+        // Als HP op of onder 0 komt → enemy sterft
+        if (currentHealth <= 0)
+            Die();
+    }
+
+    void Die()
+    {
+        // Roep de Die() functie van PlantEnemy aan (voor drops, animaties, etc.)
+        GetComponent<PlantEnemy>().Die();
+
+        // Verwijder het object zelf uit de scene
+        Destroy(gameObject);
+    }
+}
