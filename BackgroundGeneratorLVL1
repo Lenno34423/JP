@@ -1,0 +1,50 @@
+using UnityEngine;
+
+public class BackgroundGenerator : MonoBehaviour
+{
+    [Header("Tiles (4 sprites)")]
+    public Sprite[] tiles = new Sprite[4];          // De 4 verschillende achtergrond‑sprites
+
+    [Header("Aantal kopieën")]
+    public int copiesX = 20;                        // Hoeveel tiles horizontaal
+    public int copiesY = 4;                         // Hoeveel tiles verticaal
+
+    [Header("Tile grootte")]
+    public Vector2 tileSize = new Vector2(1f, 1f);  // Afstand tussen tiles (breedte/hoogte)
+
+    [Header("Start positie offset")]
+    public Vector2 startOffset = new Vector2(0f, -4f); // Startpunt van de achtergrond
+
+    void Start()
+    {
+        Generate();                                 // Maak de volledige achtergrond bij start
+    }
+
+    void Generate()
+    {
+        // Dubbele loop: x = horizontaal, y = verticaal
+        for (int x = 0; x < copiesX; x++)
+        {
+            for (int y = 0; y < copiesY; y++)
+            {
+                // Kies sprite op basis van de rij (y)
+                Sprite chosenTile = tiles[y % tiles.Length];
+
+                // Maak een nieuw GameObject voor de tile
+                GameObject tileObj = new GameObject("Tile_" + x + "_" + y);
+                tileObj.transform.parent = transform;   // Zet tile als child van dit object
+
+                // Voeg SpriteRenderer toe en zet de sprite
+                SpriteRenderer sr = tileObj.AddComponent<SpriteRenderer>();
+                sr.sprite = chosenTile;
+
+                // Bereken positie van de tile
+                tileObj.transform.localPosition = new Vector3(
+                    startOffset.x + x * tileSize.x,     // horizontale offset
+                    startOffset.y + y * tileSize.y,     // verticale offset
+                    0                                   // z‑positie
+                );
+            }
+        }
+    }
+}
