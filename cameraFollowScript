@@ -1,0 +1,18 @@
+using UnityEngine;
+
+public class cameraFollowScript : MonoBehaviour
+{
+    public Transform target;                     // De speler die gevolgd moet worden
+
+    void LateUpdate()
+    {
+        // Camera volgt enkel de X‑positie van de speler
+        // Y blijft hetzelfde zodat de camera niet op en neer beweegt
+        // Z blijft -10 zodat de camera op de juiste afstand staat
+        transform.position = new Vector3(
+            target.position.x,
+            transform.position.y,
+            -10f
+        );
+    }
+}
