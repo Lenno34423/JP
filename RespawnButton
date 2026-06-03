@@ -1,0 +1,12 @@
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class RespawnButton : MonoBehaviour
+{
+    // Wordt aangeroepen wanneer je op de "Respawn" knop in je DeathScreen klikt
+    public void Respawn()
+    {
+        Time.timeScale = 1f;               // Zet de game weer aan (was gepauzeerd bij death)
+        SceneManager.LoadScene("MainScene"); // Herlaad het level volledig
+    }
+}
