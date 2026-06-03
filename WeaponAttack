@@ -1,0 +1,24 @@
+using UnityEngine;
+
+public class WeaponAttack : MonoBehaviour
+{
+    public Animator anim;              // Animator die de spear‑attack animatie afspeelt
+    public bool isAttacking = false;   // Houdt bij of de speler momenteel aanvalt
+
+    void Update()
+    {
+        // Start een aanval wanneer K wordt ingedrukt
+        // Alleen als er geen aanval bezig is
+        if (Input.GetKeyDown(KeyCode.K) && !isAttacking)
+        {
+            isAttacking = true;            // Blokkeer nieuwe aanvallen
+            anim.SetTrigger("TrAttack");   // Speel spear‑attack animatie af
+        }
+    }
+
+    // Animation Event op het einde van de spear‑attack animatie
+    public void EndSpearAttack()
+    {
+        isAttacking = false;               // Speler mag opnieuw aanvallen
+    }
+}
