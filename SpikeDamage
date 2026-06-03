@@ -1,0 +1,20 @@
+using UnityEngine;
+
+public class SpikeDamage : MonoBehaviour
+{
+    public int damage = 1; // Hoeveel damage de spikes doen
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        // Alleen reageren als de speler de spikes raakt
+        if (other.CompareTag("Player"))
+        {
+            // Haal het playerHealth‑script op
+            playerHealth hp = other.GetComponent<playerHealth>();
+
+            // Als speler health heeft → damage toedienen
+            if (hp != null)
+                hp.TakeDamage(damage);
+        }
+    }
+}
