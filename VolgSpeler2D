@@ -1,0 +1,121 @@
+using UnityEngine;
+
+public class VolgSpeler2D : MonoBehaviour
+{
+    [Header("Instellingen")]
+    public Transform speler;                     // Referentie naar de speler
+    public float volgAfstand = 10f;              // Afstand waarop vijand begint te volgen
+    public float attackAfstand = 1.5f;           // Afstand waarop vijand begint aan te vallen
+    public float snelheid = 3f;                  // Loopsnelheid
+
+    [Header("Attack instellingen")]
+    public float attackCooldown = 1f;            // Tijd tussen aanvallen
+    private float cooldownTimer = 0f;            // Timer die aftelt tot volgende aanval
+
+    private Rigidbody2D rb;                      // Voor beweging
+    private Animator animator;                   // Voor animaties
+
+    private bool isAttacking = false;            // Of vijand momenteel aanvalt
+    private float afstandTotSpeler;              // Afstand tot speler
+
+    private Vector2 laatsteRichting = Vector2.zero; // Richting waarin vijand beweegt
+    private Vector3 origineleScale;                 // Originele schaal voor flippen
+
+    void Start()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
+
+        rb.gravityScale = 0;                     // Geen zwaartekracht
+        rb.freezeRotation = true;                // Niet draaien
+
+        origineleScale = transform.localScale;   // Sla originele schaal op
+
+        // Attack layer uit bij start
+        animator.SetLayerWeight(1, 0f);
+    }
+
+    void Update()
+    {
+        // COOLDOWN TIMER
+        if (cooldownTimer > 0)
+            cooldownTimer -= Time.deltaTime;
+
+        afstandTotSpeler = Vector2.Distance(transform.position, speler.position);
+
+        // AANVALLEN
+        if (afstandTotSpeler <= attackAfstand)
+        {
+            // Alleen aanvallen als cooldown klaar is
+            if (!isAttacking && cooldownTimer <= 0f)
+            {
+                isAttacking = true;
+
+                // Attack layer AAN
+                animator.SetLayerWeight(1, 1f);
+
+                animator.SetBool("isAttacking", true);
+                animator.SetTrigger("trAttack");
+
+                // Start cooldown
+                cooldownTimer = attackCooldown;
+            }
+
+            StopBeweging();
+            return;
+        }
+
+        // STOP AANVALLEN als speler uit range is
+        if (isAttacking)
+        {
+            isAttacking = false;
+            animator.SetBool("isAttacking", false);
+        }
+
+        // VOLGEN
+        if (afstandTotSpeler <= volgAfstand)
+        {
+            animator.SetTrigger("trRun");
+            BeweegNaarSpeler();
+        }
+        else
+        {
+            animator.SetTrigger("trIdle");
+            StopBeweging();
+        }
+    }
+
+    void BeweegNaarSpeler()
+    {
+        // Richting naar speler
+        laatsteRichting = (speler.position - transform.position).normalized;
+
+        // Beweging toepassen
+        Vector2 beweging = laatsteRichting * snelheid * Time.deltaTime;
+        rb.MovePosition(rb.position + beweging);
+    }
+
+    void LateUpdate()
+    {
+        // Flip vijand afhankelijk van spelerpositie
+        if (speler.position.x > transform.position.x)
+            transform.localScale = new Vector3(-Mathf.Abs(origineleScale.x), origineleScale.y, origineleScale.z);
+        else
+            transform.localScale = new Vector3(Mathf.Abs(origineleScale.x), origineleScale.y, origineleScale.z);
+    }
+
+    void StopBeweging()
+    {
+        rb.velocity = Vector2.zero;              // Stop alle beweging
+    }
+
+    // Animation Event op laatste frame van attack
+    public void EndAttack()
+    {
+        isAttacking = false;
+        animator.SetBool("isAttacking", false);
+
+        // Attack layer UIT
+        animator.SetLayerWeight(1, 0f);
+    }
+}
