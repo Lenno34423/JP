@@ -1,0 +1,45 @@
+using UnityEngine;
+
+public class WallStackGenerator : MonoBehaviour
+{
+    public GameObject wall1;      // Onderste muur (1 hoog)
+    public GameObject wall2;      // Segment van de hoge muur (1 segment)
+
+    public int copies = 3;        // Hoeveel sets naast elkaar
+    public float spacingX = 2f;   // Afstand tussen sets
+    public float spacingY = 1f;   // Afstand tussen gestapelde muren
+
+    void Start()
+    {
+        Generate();               // Bouw de muren bij start
+    }
+
+    void Generate()
+    {
+        Vector3 origin = transform.position; // Startpositie van de generator
+
+        for (int i = 0; i < copies; i++)
+        {
+            float baseX = origin.x + i * spacingX; // X‑positie per set
+
+            // ONDERSTE MUUR (muur1)
+            Instantiate(
+                wall1,
+                new Vector3(baseX, origin.y, origin.z),
+                Quaternion.identity,
+                transform
+            );
+
+            // 6× MUUR2 ERBOVEN (hoge muur)
+            for (int h = 0; h < 6; h++)
+            {
+                Instantiate(
+                    wall2,
+                    new Vector3(baseX, origin.y + (h + 1) * spacingY, origin.z),
+                    Quaternion.identity,
+                    transform
+                );
+            }
+        }
+    }
+}
