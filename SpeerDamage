@@ -1,0 +1,36 @@
+using UnityEngine;
+
+public class SpeerDamage : MonoBehaviour
+{
+    public int damage = 10;   // Hoeveel schade de speer doet
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        // Alleen reageren op enemies
+        if (!other.CompareTag("Enemy")) return;
+
+        // CHAMELEON
+        chameleonHealth cham = other.GetComponent<chameleonHealth>();
+        if (cham != null)
+        {
+            cham.TakeDamage(damage);   // Breng schade toe
+            return;                    // Stop hier (enemy gevonden)
+        }
+
+        // BAT
+        BatHealth bat = other.GetComponent<BatHealth>();
+        if (bat != null)
+        {
+            bat.TakeDamage(damage);
+            return;
+        }
+
+        // PLANT
+        PlantHealth plant = other.GetComponent<PlantHealth>();
+        if (plant != null)
+        {
+            plant.TakeDamage(damage);
+            return;
+        }
+    }
+}
