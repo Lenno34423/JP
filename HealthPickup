@@ -1,0 +1,43 @@
+using UnityEngine;
+
+public class HealthPickup : MonoBehaviour
+{
+    public int healAmount = 1;              // Hoeveel HP de speler krijgt bij oppakken
+    private bool playerInRange = false;     // Of de speler binnen de trigger staat
+    private playerHealth hp;                // Referentie naar het health‑script van de speler
+
+    void Update()
+    {
+        // Alleen oppakken wanneer speler in range is én op E drukt
+        if (playerInRange && Input.GetKeyDown(KeyCode.E))
+        {
+            // Voeg HP toe aan de speler
+            hp.currentHealth += healAmount;
+
+            // Pickup verdwijnt na gebruik
+            Destroy(gameObject);
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        // Speler komt in de trigger → klaar om op te pakken
+        if (other.CompareTag("Player"))
+        {
+            playerInRange = true;
+
+            // Haal het playerHealth script op zodat we HP kunnen aanpassen
+            hp = other.GetComponent<playerHealth>();
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        // Speler verlaat de trigger → kan niet meer oppakken
+        if (other.CompareTag("Player"))
+        {
+            playerInRange = false;
+            hp = null;                      // Verwijder referentie voor veiligheid
+        }
+    }
+}
