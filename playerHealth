@@ -1,0 +1,67 @@
+using UnityEngine;
+
+public class playerHealth : MonoBehaviour
+{
+    public int maxHealth = 3;                 // Maximale HP van de speler
+    public int currentHealth;                 // Huidige HP tijdens het spel
+    private Animator animator;                // Animator voor death animatie
+
+    public DeathScreenController deathScreen; // Referentie naar death screen UI
+
+    // HELM SYSTEM
+    public bool hasHelmet = false;            // Of speler momenteel een helm draagt
+    public GameObject helmetOnPlayer;         // Helm die zichtbaar is op het hoofd
+    public GameObject helmetDropPrefab;       // Helm die op de grond valt bij breken
+
+    private void Start()
+    {
+        currentHealth = maxHealth;            // Start met volle HP
+        animator = GetComponent<Animator>();  // Haal animator op
+
+        // Helm staat standaard uit
+        if (helmetOnPlayer != null)
+            helmetOnPlayer.SetActive(false);
+    }
+
+    public void TakeDamage(int amount)
+    {
+        // HELM ABSORBEERT DAMAGE
+        if (hasHelmet)
+        {
+            hasHelmet = false;                // Helm is nu weg
+
+            // Helm op hoofd uitzetten
+            if (helmetOnPlayer != null)
+                helmetOnPlayer.SetActive(false);
+
+            // Helm op de grond droppen
+            if (helmetDropPrefab != null)
+            {
+                Instantiate(
+                    helmetDropPrefab,
+                    transform.position + new Vector3(0, -0.5f, 0), // iets onder speler
+                    Quaternion.identity
+                );
+            }
+
+            return; // Schade volledig genegeerd
+        }
+
+        // GEEN HELM → NORMALE DAMAGE
+        currentHealth -= amount;              // Verminder HP
+
+        // Check of speler dood is
+        if (currentHealth <= 0)
+        {
+            if (animator != null)
+                animator.SetTrigger("TrDie"); // Speel death animatie
+
+            Invoke(nameof(Die), 0.5f);        // Wacht animatie af
+        }
+    }
+
+    void Die()
+    {
+        deathScreen.Show();                   // Toon death screen
+    }
+}
