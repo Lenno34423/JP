@@ -1,0 +1,21 @@
+using UnityEngine;
+
+public class PlayerHeavyAttack : MonoBehaviour
+{
+    public Animator anim;
+    public bool isAttacking = false;
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.K) && !isAttacking)
+        {
+            isAttacking = true;
+            anim.SetTrigger("TrAttack");
+        }
+    }
+
+    public void EndHeavyAttack()
+    {
+        isAttacking = false;
+    }
+}
