@@ -1,0 +1,17 @@
+using UnityEngine;
+
+public class WeaponPickerInitializer : MonoBehaviour
+{
+    public GameObject dagger;   // Dagger‑model dat zichtbaar moet zijn in de WeaponPicker
+    public GameObject club;     // Club‑model
+    public GameObject spear;    // Spear‑model
+
+    void Start()
+    {
+        // Wanneer je de WeaponPicker‑scene opent:
+        // Toon ALLE wapens zodat de speler ze kan bekijken en kiezen
+        dagger.SetActive(true);
+        club.SetActive(true);
+        spear.SetActive(true);
+    }
+}
