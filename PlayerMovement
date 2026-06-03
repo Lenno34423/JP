@@ -1,0 +1,174 @@
+using UnityEngine;
+
+public class PlayerMovement : MonoBehaviour
+{
+    [Header("Movement Settings")]
+    public float moveSpeed = 5f;          // Loopsnelheid van de speler
+    public float maxJumpForce = 10f;      // Maximale sprongkracht
+    public float jumpChargeSpeed = 10f;   // Hoe snel je sprong oplaadt
+
+    [Header("Ground Check Settings")]
+    public Transform groundCheck;         // Punt om te checken of speler op de grond staat
+    public float checkRadius = 0.2f;      // Radius van de ground check cirkel
+    public LayerMask groundLayer;         // Welke lagen tellen als grond
+
+    [Header("Animation")]
+    public Animator animator;             // Animator voor alle animaties
+
+    private Rigidbody2D rb;               // Rigidbody voor beweging
+    private bool isGrounded;              // Of speler op de grond staat
+    private bool isChargingJump;          // Of speler sprong aan het opladen is
+    private float jumpChargePower;        // Huidige sprongkracht tijdens opladen
+    private bool wasGrounded = false;     // Om landing te detecteren
+
+    private bool isAttacking = false;     // Of speler momenteel aanvalt
+
+    // WAPEN SYSTEEM
+    private int currentWeapon = 1;        // Huidig wapen ID
+
+    public float weapon1Speed = 1.0f;     // Animatiesnelheid wapen 1
+    public float weapon2Speed = 1.3f;     // Animatiesnelheid wapen 2
+    public float weapon3Speed = 0.8f;     // Animatiesnelheid wapen 3
+
+    private float animSpeed = 1f;         // Huidige animatiesnelheid
+
+    void Start()
+    {
+        rb = GetComponent<Rigidbody2D>(); // Haal Rigidbody op
+
+        if (animator == null)
+            animator = GetComponent<Animator>();
+
+        ApplyAnimSpeed();                 // Pas animatiesnelheid toe
+    }
+
+    void Update()
+    {
+        CheckGround();                    // Check of speler op de grond staat
+        HandleMovement();                 // Links/rechts bewegen
+        HandleJump();                     // Springen + jump charge
+        HandleAttack();                   // Aanvallen (nu ook in lucht)
+        UpdateAnimations();               // Update animatie states
+    }
+
+    // WAPEN KEUZE (ALLEEN VIA UI)
+    public void SetWeapon(int id)
+    {
+        currentWeapon = id;               // Zet wapen ID
+        animator.SetInteger("weaponID", id);
+
+        // Kies animatiesnelheid op basis van wapen
+        animSpeed = id switch
+        {
+            1 => weapon1Speed,
+            2 => weapon2Speed,
+            3 => weapon3Speed,
+            _ => 1f
+        };
+
+        ApplyAnimSpeed();
+    }
+
+    void ApplyAnimSpeed()
+    {
+        animator.speed = animSpeed;       // Pas animatiesnelheid toe
+    }
+
+    // MOVEMENT
+    void CheckGround()
+    {
+        // Check cirkel onder speler → is hij op de grond?
+        isGrounded = Physics2D.OverlapCircle(groundCheck.position, checkRadius, groundLayer);
+    }
+
+    void HandleMovement()
+    {
+        if (isAttacking) return;          // Tijdens aanval niet bewegen
+
+        float horizontal = 0f;
+
+        // Links bewegen
+        if (Input.GetKey(KeyCode.A))
+        {
+            horizontal = -moveSpeed;
+            transform.localScale = new Vector3(1, 1, 1);   // Kijk links
+        }
+        // Rechts bewegen
+        else if (Input.GetKey(KeyCode.D))
+        {
+            horizontal = moveSpeed;
+            transform.localScale = new Vector3(-1, 1, 1);  // Kijk rechts
+        }
+
+        // Pas velocity toe
+        rb.velocity = new Vector2(horizontal, rb.velocity.y);
+
+        // Animatie: bewegen ja/nee
+        animator.SetBool("IsMoving", horizontal != 0);
+    }
+
+    // JUMP
+    void HandleJump()
+    {
+        if (isAttacking) return;          // Tijdens aanval geen sprong
+
+        if (isGrounded)
+        {
+            // Sprong opladen
+            if (Input.GetKey(KeyCode.Space))
+            {
+                isChargingJump = true;
+                jumpChargePower += jumpChargeSpeed * Time.deltaTime;
+                jumpChargePower = Mathf.Clamp(jumpChargePower, 5, maxJumpForce);
+            }
+
+            // Sprong loslaten
+            if (Input.GetKeyUp(KeyCode.Space) && isChargingJump)
+            {
+                rb.AddForce(Vector2.up * jumpChargePower, ForceMode2D.Impulse);
+                isChargingJump = false;
+                jumpChargePower = 0;
+                animator.SetTrigger("TrJump"); // Speel jump animatie
+            }
+        }
+        else
+        {
+            // In lucht → reset charge
+            isChargingJump = false;
+            jumpChargePower = 0;
+        }
+    }
+
+    // ATTACK (NU OOK IN DE LUCHT)
+    void HandleAttack()
+    {
+        if (isAttacking) return;          // Geen dubbele aanval
+        if (isChargingJump) return;       // Niet aanvallen tijdens jump charge
+
+        // Aanval starten
+        if (Input.GetKeyDown(KeyCode.K))
+        {
+            isAttacking = true;
+            animator.SetTrigger("TrAttack"); // Speel attack animatie
+        }
+    }
+
+    public void EndAttack()
+    {
+        isAttacking = false;              // Animation Event → aanval klaar
+    }
+
+    // ANIMATIONS
+    void UpdateAnimations()
+    {
+        animator.SetBool("IsGrounded", isGrounded);
+
+        // Landing → terug naar idle
+        if (isGrounded && !wasGrounded && !animator.GetBool("IsMoving"))
+        {
+            animator.Play("Idle");
+        }
+
+        wasGrounded = isGrounded;
+    }
+}
