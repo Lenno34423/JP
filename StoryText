@@ -1,0 +1,35 @@
+using UnityEngine;
+using TMPro;
+using UnityEngine.EventSystems;
+
+public class StoryText : MonoBehaviour, IPointerClickHandler
+{
+    public TextMeshProUGUI uiText;   // De UI‑tekst waar de strofen worden getoond
+    public string[] strofen;         // Alle tekstblokken die na elkaar getoond worden
+
+    private int index = 0;           // Huidige strofe die getoond wordt
+
+    void Start()
+    {
+        uiText.text = strofen[index]; // Begin met de eerste strofe
+    }
+
+    // Wordt automatisch aangeroepen wanneer speler op de tekst klikt
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        NextStrofe();                 // Ga naar de volgende strofe
+    }
+
+    void NextStrofe()
+    {
+        index++;                      // Volgende strofe
+
+        // Alleen updaten als er nog strofen over zijn
+        if (index < strofen.Length)
+        {
+            uiText.text = strofen[index];
+        }
+        // Als je wil dat de tekst verdwijnt op het einde,
+        // kan je hier uiText.gameObject.SetActive(false) doen.
+    }
+}
