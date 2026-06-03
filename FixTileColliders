@@ -1,0 +1,21 @@
+using UnityEngine;
+using UnityEditor;
+using UnityEngine.Tilemaps;
+
+public class FixTileColliders : MonoBehaviour
+{
+    // Voegt een knop toe in de Unity menubalk: Tools → Fix Tile Colliders
+    [MenuItem("Tools/Fix Tile Colliders")]
+    static void FixColliders()
+    {
+        // Zoek ALLE Tile‑assets in het hele project, zelfs als ze niet in de scene zitten
+        foreach (var tile in Resources.FindObjectsOfTypeAll<Tile>())
+        {
+            tile.colliderType = Tile.ColliderType.Sprite; // Forceer collider op Sprite
+            EditorUtility.SetDirty(tile);                 // Markeer asset als gewijzigd
+        }
+
+        AssetDatabase.SaveAssets();                       // Sla alle wijzigingen op
+        Debug.Log("Alle tile colliders gefixt!");         // Debug melding
+    }
+}
