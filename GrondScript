@@ -1,0 +1,89 @@
+using UnityEngine;
+using System.Collections.Generic;
+
+public class GrondScript : MonoBehaviour
+{
+    [Header("Ground Settings")]
+    public GameObject groundTilePrefab;          // Prefab van één grond‑tile
+    
+    [Header("Pattern")]
+    [TextArea(1, 3)]
+    public string groundPattern = "100,5,10,5,10"; // Patroonstring die bepaalt waar tiles komen
+    
+    [Header("Positioning")]
+    public bool centerGround = true;             // Of de hele grond gecentreerd moet worden
+
+    void Start()
+    {
+        // Start automatisch met het genereren van de grond
+        CreateGroundFromString();
+    }
+
+    void CreateGroundFromString()
+    {
+        // Check of prefab bestaat
+        if (groundTilePrefab == null)
+        {
+            Debug.LogError("Ground Tile Prefab is niet toegewezen!");
+            return;
+        }
+
+        // Check of prefab een SpriteRenderer heeft
+        SpriteRenderer spriteRenderer = groundTilePrefab.GetComponent<SpriteRenderer>();
+        if (spriteRenderer == null)
+        {
+            Debug.LogError("Ground Tile Prefab heeft geen SpriteRenderer!");
+            return;
+        }
+        
+        // Breedte van één tile bepalen
+        float tileWidth = spriteRenderer.bounds.size.x;
+        
+        // Patroonstring splitsen op komma's
+        string[] numbers = groundPattern.Split(',');
+        List<float> tilePositions = new List<float>(); // Lijst met X‑posities waar tiles komen
+        float currentX = 0f;                           // Huidige X‑positie tijdens berekening
+        
+        // Eerste pass: bereken alle posities op basis van het patroon
+        foreach (string numStr in numbers)
+        {
+            if (int.TryParse(numStr.Trim(), out int count))
+            {
+                if (count > 0) // Positief getal = zoveel tiles plaatsen
+                {
+                    for (int i = 0; i < count; i++)
+                    {
+                        tilePositions.Add(currentX);   // Tile komt hier
+                        currentX += tileWidth;         // Ga één tile verder
+                    }
+                }
+                else if (count < 0) // Negatief getal = lege ruimte
+                {
+                    currentX += Mathf.Abs(count) * tileWidth; // Sla ruimte over
+                }
+                else // 0 = niets doen
+                {
+                    // Skip
+                }
+            }
+        }
+        
+        // Optioneel centreren van de grond
+        float startOffset = 0f;
+        if (centerGround && tilePositions.Count > 0)
+        {
+            float totalWidth = currentX - tileWidth;   // Totale breedte van alle tiles
+            startOffset = -totalWidth / 2f;            // Offset zodat het midden op X=0 ligt
+        }
+        
+        // Tweede pass: instantiate de tiles op de berekende posities
+        foreach (float pos in tilePositions)
+        {
+            Vector3 spawnPos = transform.position + new Vector3(pos + startOffset, 0f, 0f);
+            Instantiate(groundTilePrefab, spawnPos, Quaternion.identity, transform);
+        }
+        
+        // Debug info
+        Debug.Log($"Grond gemaakt met {tilePositions.Count} tiles. Totale lengte: {currentX} eenheden");
+    }
+}
