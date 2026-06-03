@@ -1,0 +1,12 @@
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class MainMenu : MonoBehaviour
+{
+    // Wordt uitgevoerd wanneer je op de "Start Game" knop drukt
+    public void StartGame()
+    {
+        Time.timeScale = 1f;                 // Zorg dat de game niet meer gepauzeerd is
+        SceneManager.LoadScene("WeaponPicker"); // Laad de WeaponPicker‑scene
+    }
+}
