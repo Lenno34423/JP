@@ -1,0 +1,11 @@
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class GoMainMenu : MonoBehaviour
+{
+    public void StartGame()
+    {
+        // Laad de MainScene wanneer de knop wordt ingedrukt
+        SceneManager.LoadScene("MainScene");
+    }
+}
