@@ -1,0 +1,39 @@
+using UnityEngine;
+
+public class PutInteract : MonoBehaviour
+{
+    public Transform teleportPoint;   // Positie waar de speler naartoe wordt geteleporteerd
+    private bool playerInRange = false; // Of de speler binnen de trigger staat
+
+    void Update()
+    {
+        // Als speler in range is én op E drukt → teleporteren
+        if (playerInRange && Input.GetKeyDown(KeyCode.E))
+        {
+            TeleportPlayer();
+        }
+    }
+
+    void TeleportPlayer()
+    {
+        // Zoek de speler via tag
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+
+        // Zet spelerpositie naar teleportPoint
+        player.transform.position = teleportPoint.position;
+    }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        // Speler komt in de trigger → kan teleporteren
+        if (other.CompareTag("Player"))
+            playerInRange = true;
+    }
+
+    void OnTriggerExit2D(Collider2D other)
+    {
+        // Speler verlaat de trigger → kan niet meer teleporteren
+        if (other.CompareTag("Player"))
+            playerInRange = false;
+    }
+}
