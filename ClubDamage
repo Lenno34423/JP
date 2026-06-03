@@ -1,0 +1,36 @@
+using UnityEngine;
+
+public class ClubDamage : MonoBehaviour
+{
+    public int damage = 15; // Hoeveel schade de club doet
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        // Alleen reageren als het object de Enemy‑tag heeft
+        if (!other.CompareTag("Enemy")) return;
+
+        // Chameleon raken
+        chameleonHealth cham = other.GetComponent<chameleonHealth>();
+        if (cham != null)
+        {
+            cham.TakeDamage(damage);   // Schade toebrengen
+            return;                    // Stop zodat andere checks niet meer lopen
+        }
+
+        // Bat raken
+        BatHealth bat = other.GetComponent<BatHealth>();
+        if (bat != null)
+        {
+            bat.TakeDamage(damage);
+            return;
+        }
+
+        // Plant raken
+        PlantHealth plant = other.GetComponent<PlantHealth>();
+        if (plant != null)
+        {
+            plant.TakeDamage(damage);
+            return;
+        }
+    }
+}
