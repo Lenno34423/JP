@@ -1,0 +1,22 @@
+using UnityEngine;
+
+public class WeaponDamage : MonoBehaviour
+{
+    public int damage = 1;   // Hoeveel schade het wapen doet bij een hit
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        // Alleen reageren als het object de Enemy‑tag heeft
+        if (collision.CompareTag("Enemy"))
+        {
+            // Probeer het chameleonHealth‑script op te halen
+            chameleonHealth hp = collision.GetComponent<chameleonHealth>();
+
+            // Als de enemy een chameleon is → schade toebrengen
+            if (hp != null)
+            {
+                hp.TakeDamage(damage);
+            }
+        }
+    }
+}
