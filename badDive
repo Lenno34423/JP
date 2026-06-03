@@ -1,0 +1,279 @@
+using UnityEngine;
+
+public class EnemyDive : MonoBehaviour
+{
+    public Transform player;                     // Referentie naar de speler
+
+    public GameObject attackHitbox;              // Hitbox die schade doet aan de speler
+    public GameObject hpHitbox;                  // Hitbox waarmee de speler de bat kan raken
+
+    // Afstanden waarop de bat boven/naast de speler gaat hangen
+    public float hoverX = 3f;
+    public float hoverY = 4f;
+
+    // Snelheden voor verschillende bewegingen
+    public float diveSpeed = 10f;                // Snelheid van de duik
+    public float flySpeed = 14f;                 // Snelheid van horizontale vlucht
+    public float upSpeed = 10f;                  // Snelheid omhoog na aanval
+    public float hoverMoveSpeed = 8f;            // Snelheid om naar hover‑positie te bewegen
+
+    // Extra instellingen voor aanvalscyclus
+    public float exitOffset = 8f;                // Hoe ver hij voorbij de speler vliegt
+    public float waitTime = 0.5f;                // Tijd dat hij wacht op de grond
+    public float attackDelay = 2f;               // Tijd tussen aanvallen
+    public float wakeDistance = 10f;             // Afstand waarop de bat wakker wordt
+
+    // Alle mogelijke toestanden van de bat
+    private enum S { Sleep, Wake, MoveToHover, Hover, Dive, Fly, Wait, Up }
+    private S state = S.Sleep;                   // Start in slaapmodus
+
+    private float timer = 0f;                    // Timer voor delays
+    private int side = 1;                        // Aan welke kant van de speler hij hangt
+    private int diveDirection = 1;               // Richting van de duik/vlucht
+
+    void Start()
+    {
+        // Hitboxes uitzetten bij start
+        if (attackHitbox != null) attackHitbox.SetActive(false);
+        if (hpHitbox != null) hpHitbox.SetActive(false);
+    }
+
+    void Update()
+    {
+        // Veiligheidschecks
+        if (this == null || gameObject == null) return;
+        if (player == null) { Disappear(); return; }
+
+        FacePlayer(); // Draait de bat naar de speler
+
+        // State machine: bepaalt wat de bat op elk moment doet
+        switch (state)
+        {
+            case S.Sleep:   // Wacht tot speler dichtbij komt
+                if (Vector2.Distance(transform.position, player.position) < wakeDistance)
+                    state = S.Wake;
+                break;
+
+            case S.Wake:    // Start aanvalscyclus
+                timer = attackDelay;
+                state = S.MoveToHover;
+                break;
+
+            case S.MoveToHover:  // Beweegt naar positie boven/naast speler
+                MoveToHover();
+                break;
+
+            case S.Hover:        // Blijft boven speler hangen tot timer afloopt
+                Hover();
+                break;
+
+            case S.Dive:         // Duikt naar beneden richting speler
+                Dive();
+                break;
+
+            case S.Fly:          // Vliegt horizontaal voorbij speler
+                Fly();
+                break;
+
+            case S.Wait:         // Wacht even op de grond
+                Wait();
+                break;
+
+            case S.Up:           // Gaat terug omhoog naar hover‑positie
+                Up();
+                break;
+        }
+    }
+    void FacePlayer()
+    {
+        if (player == null) return;
+
+        // Links kijken
+        if (player.position.x < transform.position.x)
+            transform.localScale = new Vector3(3, 3, 3);
+
+        // Rechts kijken
+        else
+            transform.localScale = new Vector3(-3, 3, 3);
+    }
+
+    // Beweegt naar hover‑positie
+    void MoveToHover()
+    {
+        if (player == null || gameObject == null)
+        {
+            Disappear();
+            return;
+        }
+
+        // Doelpositie boven/naast speler
+        Vector2 target = new Vector2(
+            player.position.x + side * hoverX,
+            player.position.y + hoverY
+        );
+
+        // Beweeg richting doel
+        transform.position = Vector2.MoveTowards(
+            transform.position,
+            target,
+            hoverMoveSpeed * Time.deltaTime
+        );
+
+        // Aangekomen → naar Hover state
+        if (Vector2.Distance(transform.position, target) < 0.1f)
+        {
+            timer = attackDelay;
+            state = S.Hover;
+        }
+    }
+
+    // Blijft boven speler hangen
+    void Hover()
+    {
+        if (player == null || gameObject == null)
+        {
+            Disappear();
+            return;
+        }
+
+        // Blijft hover‑positie volgen
+        Vector2 target = new Vector2(
+            player.position.x + side * hoverX,
+            player.position.y + hoverY
+        );
+
+        transform.position = Vector2.MoveTowards(
+            transform.position,
+            target,
+            4f * Time.deltaTime
+        );
+
+        // Timer aftellen → start duik
+        timer -= Time.deltaTime;
+        if (timer <= 0)
+        {
+            // Bepaal duikrichting
+            diveDirection = transform.position.x < player.position.x ? 1 : -1;
+            state = S.Dive;
+        }
+    }
+
+    // Duikt naar beneden
+    void Dive()
+    {
+        if (player == null || gameObject == null)
+        {
+            Disappear();
+            return;
+        }
+
+        float targetY = player.position.y - 0.5f;
+
+        // Beweeg naar beneden
+        transform.Translate(Vector2.down * diveSpeed * Time.deltaTime);
+
+        // Aangekomen op duikhoogte
+        if (transform.position.y <= targetY)
+        {
+            transform.position = new Vector2(transform.position.x, targetY);
+
+            // Schade‑hitbox aanzetten
+            if (attackHitbox != null) attackHitbox.SetActive(true);
+            if (hpHitbox != null) hpHitbox.SetActive(false);
+
+            state = S.Fly;
+        }
+    }
+
+    // Vliegt horizontaal voorbij speler
+    void Fly()
+    {
+        if (player == null || gameObject == null)
+        {
+            Disappear();
+            return;
+        }
+
+        // Horizontale vlucht
+        transform.Translate(Vector2.right * diveDirection * flySpeed * Time.deltaTime);
+
+        // Doelpositie voorbij speler
+        float targetX = player.position.x + diveDirection * exitOffset;
+
+        // Check of bat voorbij doel is
+        bool passed =
+            (diveDirection == 1 && transform.position.x >= targetX) ||
+            (diveDirection == -1 && transform.position.x <= targetX);
+
+        if (passed)
+        {
+            // Schade‑hitbox uitzetten
+            if (attackHitbox != null) attackHitbox.SetActive(false);
+
+            timer = waitTime;
+            state = S.Wait;
+        }
+    }
+
+    // Wacht op de grond
+    void Wait()
+    {
+        if (hpHitbox == null)
+        {
+            Disappear();
+            return;
+        }
+
+        // HP‑hitbox aanzetten zodat speler bat kan raken
+        hpHitbox.SetActive(true);
+
+        timer -= Time.deltaTime;
+
+        // Klaar met wachten → omhoog
+        if (timer <= 0)
+        {
+            if (hpHitbox != null) hpHitbox.SetActive(false);
+
+            if (player != null && gameObject != null)
+                state = S.Up;
+            else
+                Disappear();
+        }
+    }
+
+    // Gaat terug omhoog naar hover‑positie
+    void Up()
+    {
+        if (player == null || gameObject == null)
+        {
+            Disappear();
+            return;
+        }
+
+        float targetY = player.position.y + hoverY;
+
+        // Beweeg omhoog
+        transform.Translate(Vector2.up * upSpeed * Time.deltaTime);
+
+        // Aangekomen → wissel kant en ga terug naar hover
+        if (transform.position.y >= targetY)
+        {
+            side *= -1;
+            state = S.MoveToHover;
+        }
+    }
+
+    // Verdwijnt veilig zonder errors
+    void Disappear()
+    {
+        if (this == null || gameObject == null)
+            return;
+
+        if (attackHitbox != null)
+            attackHitbox.SetActive(false);
+        if (hpHitbox != null)
+            hpHitbox.SetActive(false);
+
+        gameObject.SetActive(false);
+    }
+}
