@@ -1,0 +1,40 @@
+using UnityEngine;
+
+public class BatHealth : MonoBehaviour
+{
+    public int maxHealth = 3;                 // Maximale HP van de bat
+    private int currentHealth;                // Huidige HP
+
+    public GameObject attackHitbox;           // Hitbox die schade doet aan de speler
+    public GameObject hpHitbox;               // Hitbox waarmee de speler de bat kan raken
+
+    void Start()
+    {
+        currentHealth = maxHealth;            // Bat start met volle HP
+    }
+
+    public void TakeDamage(int amount)
+    {
+        currentHealth -= amount;              // Trek schade af van de HP
+
+        if (currentHealth <= 0)               // Als HP op of onder 0 komt
+        {
+            Die();                            // Bat sterft
+        }
+    }
+
+    void Die()
+    {
+        // 1. EnemyDive uitschakelen zodat de AI stopt met bewegen/aanvallen
+        EnemyDive dive = GetComponent<EnemyDive>();
+        if (dive != null)
+            dive.enabled = false;
+
+        // 2. Hitboxes uitzetten zodat er geen errors komen
+        if (attackHitbox != null) attackHitbox.SetActive(false);
+        if (hpHitbox != null) hpHitbox.SetActive(false);
+
+        // 3. Bat verwijderen uit de scene
+        Destroy(gameObject);
+    }
+}
