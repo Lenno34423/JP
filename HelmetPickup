@@ -1,0 +1,42 @@
+using UnityEngine;
+
+public class HelmetPickup : MonoBehaviour
+{
+    public GameObject helmetOnPlayer;        // Het helm‑object dat op het hoofd van de speler staat
+    private bool playerInRange = false;      // True wanneer speler binnen de trigger staat
+    private playerHealth hp;                 // Referentie naar het health‑script van de speler
+
+    void Update()
+    {
+        // Alleen oppakken wanneer speler in range is én op E drukt
+        if (playerInRange && Input.GetKeyDown(KeyCode.E))
+        {
+            hp.hasHelmet = true;             // Speler heeft nu een helm (bescherming)
+            helmetOnPlayer.SetActive(true);  // Toon de helm op het hoofd
+
+            Destroy(gameObject);             // Verwijder de pickup uit de wereld
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        // Speler komt in de trigger → klaar om helm op te pakken
+        if (other.CompareTag("Player"))
+        {
+            playerInRange = true;
+
+            // Haal het playerHealth‑script op zodat we hasHelmet kunnen aanpassen
+            hp = other.GetComponent<playerHealth>();
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        // Speler verlaat de trigger → kan helm niet meer oppakken
+        if (other.CompareTag("Player"))
+        {
+            playerInRange = false;
+            hp = null;                       // Verwijder referentie voor veiligheid
+        }
+    }
+}
