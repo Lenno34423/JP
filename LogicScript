@@ -1,0 +1,17 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class LogicScript : MonoBehaviour
+{
+    public int playerHP;          // Huidige HP van de speler
+    public Text HPText;           // UI‑tekst die de HP toont op het scherm
+    
+    [ContextMenu("Decrease HP")]  // Maakt een knop in de Inspector om HP te verlagen
+    public void DecreaseHP()
+    {
+        playerHP -= 1;                        // Verminder HP met 1
+        HPText.text = playerHP.ToString();    // Update de UI‑tekst zodat het zichtbaar verandert
+    }
+}
