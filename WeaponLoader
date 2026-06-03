@@ -1,0 +1,26 @@
+using UnityEngine;
+
+public class WeaponLoader : MonoBehaviour
+{
+    public GameObject dagger;   // Referentie naar het dagger‑object in de scene
+    public GameObject club;     // Referentie naar het club‑object
+    public GameObject spear;    // Referentie naar het spear‑object
+
+    void Start()
+    {
+        // Eerst ALLE wapens uitzetten
+        dagger.SetActive(false);
+        club.SetActive(false);
+        spear.SetActive(false);
+
+        // Check welk wapen gekozen is in de WeaponPicker‑scene
+        if (GameManager.selectedWeapon == "dagger")
+            dagger.SetActive(true);
+
+        if (GameManager.selectedWeapon == "club")
+            club.SetActive(true);
+
+        if (GameManager.selectedWeapon == "spear")
+            spear.SetActive(true);
+    }
+}
