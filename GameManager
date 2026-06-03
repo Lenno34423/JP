@@ -1,0 +1,13 @@
+using UnityEngine;
+
+public class GameManager : MonoBehaviour
+{
+    public static string selectedWeapon;   // Houdt bij welk wapen de speler gekozen heeft
+
+    void Awake()
+    {
+        // Zorgt ervoor dat dit object NIET verdwijnt bij het laden van een nieuwe scene
+        // Hierdoor blijft selectedWeapon altijd bewaard
+        DontDestroyOnLoad(gameObject);
+    }
+}
