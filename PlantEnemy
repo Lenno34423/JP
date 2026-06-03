@@ -1,0 +1,95 @@
+using UnityEngine;
+
+public class PlantEnemy : MonoBehaviour
+{
+    public Animator anim;                 // Animator voor idle/attack animaties
+    public Transform player;              // Referentie naar de speler
+
+    [Header("Ranges")]
+    public float attackRange = 8f;        // Hoe ver de plant kan schieten
+    public float minDelay = 0.3f;         // Delay wanneer speler heel dichtbij is
+    public float maxDelay = 1.5f;         // Delay wanneer speler net in range komt
+
+    [Header("Shooting")]
+    public GameObject bulletPrefab;       // Prefab van de kogel
+    public Transform shootPoint;          // Positie waar de kogel uit komt
+
+    [Header("Drops")]
+    public GameObject healthDropPrefab;   // Prefab van health pickup (50% kans)
+
+    private bool playerInRange = false;   // Of speler binnen attack range is
+    private float attackTimer = 0f;       // Timer voor attack delay
+
+    void Update()
+    {
+        float dist = Vector2.Distance(transform.position, player.position);
+
+        // Flip richting speler (zodat plant altijd naar speler kijkt)
+        if (player.position.x < transform.position.x)
+            transform.localScale = new Vector3(3, 3, 3);    // Kijk links
+        else
+            transform.localScale = new Vector3(-3, 3, 3);   // Kijk rechts
+
+        // Check of speler in attack range is
+ 
+        if (dist <= attackRange)
+        {
+            playerInRange = true;
+        }
+        else
+        {
+            // Als speler net uit range gaat → terug naar idle animatie
+            if (playerInRange)
+                anim.SetTrigger("TrIdle");
+
+            playerInRange = false;
+        }
+
+        // Aanvallen zolang speler in range is
+
+        if (playerInRange)
+        {
+            attackTimer -= Time.deltaTime;
+
+            // Timer klaar → aanval starten
+            if (attackTimer <= 0f)
+            {
+                anim.SetTrigger("TrAttack");   // Speel attack animatie
+                attackTimer = CalculateDelay(dist); // Delay afhankelijk van afstand
+            }
+        }
+    }
+
+    // Berekent attack delay op basis van afstand tot speler
+    // Dichterbij = sneller schieten
+
+    float CalculateDelay(float distance)
+    {
+        float t = distance / attackRange;              // 1 = ver, 0 = dichtbij
+        return Mathf.Lerp(minDelay, maxDelay, t);      // Interpoleer tussen min/max delay
+    }
+
+    // Wordt aangeroepen via Animation Event midden in attack animatie
+
+    public void Shoot()
+    {
+        Instantiate(bulletPrefab, shootPoint.position, shootPoint.rotation);
+    }
+
+    // Enemy sterft → 50% kans op health drop
+
+    public void Die()
+    {
+        // Random.value = getal tussen 0 en 1
+        if (Random.value <= 0.5f)
+        {
+            Instantiate(
+                healthDropPrefab,
+                transform.position,
+                Quaternion.identity
+            );
+        }
+
+        Destroy(gameObject); // Verwijder enemy
+    }
+}
