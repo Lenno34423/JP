@@ -1,0 +1,72 @@
+using UnityEngine;
+
+public class BulletTracking : MonoBehaviour
+{
+    public float speed = 6f;                     // Hoe snel de kogel vooruit beweegt
+    public float rotateSpeed = 4f;               // Hoe snel de kogel naar de speler bijstuurt
+    public float lifeTime = 5f;                  // Failsafe: kogel verdwijnt na X seconden
+    public int damage = 1;                       // Hoeveel schade de kogel doet
+
+    private Transform player;                    // Referentie naar de speler
+    private Vector2 direction;                   // Huidige bewegingsrichting van de kogel
+
+    void Start()
+    {
+        // Zoek speler via tag
+        player = GameObject.FindGameObjectWithTag("Player").transform;
+
+        // Beginrichting: recht naar de speler
+        direction = (player.position - transform.position).normalized;
+
+        // Kogel automatisch verwijderen na lifeTime
+        Destroy(gameObject, lifeTime);
+    }
+
+    void Update()
+    {
+        // Als speler bestaat → richting bijsturen
+        if (player != null)
+        {
+            // Nieuwe richting naar speler
+            Vector2 targetDir = (player.position - transform.position).normalized;
+
+            // Smooth tracking: langzaam bijdraaien richting speler
+            direction = Vector2.Lerp(direction, targetDir, rotateSpeed * Time.deltaTime);
+        }
+
+        // Kogel vooruit bewegen
+        transform.position += (Vector3)direction * speed * Time.deltaTime;
+
+        // Als kogel buiten beeld is → verwijderen
+        if (!IsVisibleFrom(Camera.main))
+            Destroy(gameObject);
+    }
+
+    // Checkt of de kogel zichtbaar is in de camera
+    bool IsVisibleFrom(Camera cam)
+    {
+        Vector3 vp = cam.WorldToViewportPoint(transform.position);
+        return vp.x > 0 && vp.x < 1 &&
+               vp.y > 0 && vp.y < 1 &&
+               vp.z > 0;
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        // Raakt speler → damage + destroy
+        if (collision.CompareTag("Player"))
+        {
+            playerHealth hp = collision.GetComponent<playerHealth>();
+            if (hp != null)
+                hp.TakeDamage(damage);
+
+            Destroy(gameObject);
+        }
+
+        // Raakt melee‑hitbox → kogel kapot
+        if (collision.CompareTag("PlayerAttack"))
+        {
+            Destroy(gameObject);
+        }
+    }
+}
