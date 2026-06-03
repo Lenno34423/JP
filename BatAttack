@@ -1,0 +1,34 @@
+using UnityEngine;
+
+public class BatAttack : MonoBehaviour
+{
+    public int damage = 10;                 // Hoeveel schade de bat doet aan de speler
+    private bool canDealDamage = true;      // Of de bat op dit moment schade mag toebrengen
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        // Als de bat momenteel geen schade mag doen, stop meteen
+        if (!canDealDamage) return;
+
+        // Check of het object dat geraakt wordt een playerHealth script heeft
+        playerHealth hp = other.GetComponent<playerHealth>();
+
+        // Als het de speler is → schade toebrengen
+        if (hp != null)
+        {
+            hp.TakeDamage(damage);
+        }
+    }
+
+    // Wordt geactiveerd via een animatie-event wanneer de aanval begint
+    public void EnableDamage()
+    {
+        canDealDamage = true;               // Vanaf nu kan de bat schade doen
+    }
+
+    // Wordt geactiveerd via een animatie-event wanneer de aanval eindigt
+    public void DisableDamage()
+    {
+        canDealDamage = false;              // Bat kan geen schade meer doen
+    }
+}
