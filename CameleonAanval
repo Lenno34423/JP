@@ -1,0 +1,32 @@
+using UnityEngine;
+
+public class CameleonAanval : MonoBehaviour
+{
+    public int damageAmount = 10;                 // Hoeveel schade de aanval doet
+    public bool canDealDamage = false;            // Of de hitbox op dit moment schade mag doen
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        // Als schade uit staat → stop meteen
+        if (!canDealDamage) return;
+
+        // Check of het object dat geraakt wordt een playerHealth script heeft
+        playerHealth health = other.GetComponent<playerHealth>();
+
+        // Als het de speler is → schade toebrengen
+        if (health != null)
+        {
+            health.TakeDamage(damageAmount);
+        }
+    }
+
+    public void EnableDamage()
+    {
+        // Wordt meestal via animatie‑event geactiveerd
+        canDealDamage = true;                     // Aanval actief
+        GetComponent<Collider2D>().enabled = true; // Hitbox inschakelen
+    }
+
+    public void DisableDamage()
+    {
+        // Wordt via animatie
